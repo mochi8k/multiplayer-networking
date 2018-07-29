@@ -19,16 +19,21 @@ public class PlayerController : NetworkBehaviour {
         transform.Translate(0, 0, z);
 
         if (Input.GetKeyDown(KeyCode.Space)) {
-            Fire();
+            CmdFire();
         }
     }
 
-    void Fire() {
+    // クライアントに呼び出されて、サーバーで実行される
+    [Command]
+    void CmdFire() {
         // BulletプレハブからBulletを生成する
         var bullet = (GameObject)Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
 
         // 弾の速度を増加させる
         bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * 6;
+
+        // Client上に弾を生成する
+        NetworkServer.Spawn(bullet);
 
         // 2秒後に弾を破壊する
         Destroy(bullet, 2.0f);
