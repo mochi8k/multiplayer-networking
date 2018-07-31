@@ -18,12 +18,22 @@ public class Health : NetworkBehaviour {
 
         currentHealth -= amount;
         if (currentHealth <= 0) {
-            currentHealth = 0;
-            Debug.Log("Dead!");
+            currentHealth = maxHealth;
+
+            // サーバー上で呼び出され、クライアントで実行される
+            RpcRespawn();
         }
     }
 
     void OnChangeHealth(int health) {
         healthBar.sizeDelta = new Vector2(health, healthBar.sizeDelta.y);
+    }
+
+    // [ClientRpc]
+    void RpcRespawn() {
+        if (isLocalPlayer) {
+            // ゼロ地点に戻る
+            transform.position = Vector3.zero;
+        }
     }
 }
