@@ -13,6 +13,14 @@ public class Health : NetworkBehaviour {
 
     public RectTransform healthBar;
 
+    private NetworkStartPosition[] spawnPoints;
+
+    void Start() {
+        if (isLocalPlayer) {
+            spawnPoints = FindObjectsOfType<NetworkStartPosition>();
+        }
+    }
+
     public void TakeDamage(int amount) {
         if (!isServer) {
             return;
@@ -36,11 +44,19 @@ public class Health : NetworkBehaviour {
         healthBar.sizeDelta = new Vector2(health, healthBar.sizeDelta.y);
     }
 
-    // [ClientRpc]
+    [ClientRpc]
     void RpcRespawn() {
         if (isLocalPlayer) {
-            // ゼロ地点に戻る
-            transform.position = Vector3.zero;
+
+            // 初期値として生成位置を元々の位置に設定する
+            Vector3 spawnPoint = Vector3.zero;
+
+            if (spawnPoints != null && spawnPoints.Length > 0) {
+                spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)].transform.position;
+            }
+
+            // プレイヤーの位置を、選択された生成位置に設定する
+            transform.position = spawnPoint;
         }
     }
 }
